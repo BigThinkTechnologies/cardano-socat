@@ -21,16 +21,15 @@ print_help()
 	echo "DESTINATION_SOCKET_PATH"
 }
 
-# TODO:// we have to mkdir SOURCE_SOCKET_PATH or DESTINATION_SOCKET_PATH with the last bit left out
-
 # server mode
 if [[ "--socket-file-to-tcp" == "$args" ]];
 then   	
 	if [[ ! -z "$SOURCE_SOCKET_PATH" && "$SOURCE_SOCKET_PATH" != " " && ! -z "$DESTINATION_TCP_PORT" && "$DESTINATION_TCP_PORT" != " " && "${DESTINATION_TCP_PORT##*[!0-9]*}" ]];
 	then
 		# run in server mode
-		mkdir -p "${SOURCE_SOCKET_PATH}/.."
-		socat TCP-LISTEN:${DESTINATION_TCP_PORT},fork,reuseaddr, UNIX-CONNECT:${SOURCE_SOCKET_PATH}
+		socket_path=$(realpath $SOURCE_SOCKET_PATH)
+		echo "listening ${args}"
+		socat TCP-LISTEN:${DESTINATION_TCP_PORT},fork,reuseaddr, UNIX-CONNECT:$socket_path
 	else
 		echo "Error, environment variables SOURCE_SOCKET_PATH or DESTINATION_TCP_PORT were not set correctly for socket-file-to-tcp mode"
 		print_help
@@ -42,8 +41,11 @@ then
 	if [[ ! -z "$DESTINATION_SOCKET_PATH" && "$DESTINATION_SOCKET_PATH" != " " && ! -z "$SOURCE_TCP_PORT" && "$SOURCE_TCP_PORT" != " " && "${SOURCE_TCP_PORT##*[!0-9]*}" && ! -z "$SOURCE_IP" && "SOURCE_IP" != " " ]];
 	then
 		# run in client model
-		mkdir -p "${DESTINATION_SOCKET_PATH}/.."
-		socat UNIX-LISTEN:${DESTINATION_SOCKET_PATH},fork,reuseaddr,unlink-early, TCP:${SOURCE_IP}:${SOURCE_TCP_PORT}
+		# remove the last /socket_file_name and make the directory locally
+		mkdir -p $(dirname $DESTINATION_SOCKET_PATH)
+		socket_path=$(realpath $DESTINATION_SOCKET_PATH)
+		echo "listening ${args}"
+		socat UNIX-LISTEN:$socket_path,fork,reuseaddr,unlink-early, TCP:${SOURCE_IP}:${SOURCE_TCP_PORT}
 	else
 		echo "Error, environment variables DESTINATION_SOCKET_PATH or SOURCE_TCP_PORT or SOURCE_IP were not set correctly for tcp-to-socket-file mode"
 		print_help
