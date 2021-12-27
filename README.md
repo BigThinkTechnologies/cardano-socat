@@ -6,7 +6,7 @@ Docker image to support forwarding file based sockets to TCP and TCP to file bas
 ### Why
 ------------
 While running cardano nodes, dbsync, postgres and wallet-server we found it difficult to meet the minimum hardware requirements and remain scalable/stable with all of our custom software components. 
-When a [hardfork](###-Learning-About-Cardano-Hardforks-the-Hard-Way) comes along we often found ourselves down or struggling last minute to keep up.
+When a [hardfork](Learning-About-Cardano-Hardforks-the-Hard-Way) comes along we often found ourselves down or struggling last minute to keep up.
 
 We run a kubernetes cluster, separating our logical units of work using namespaces.
 In the past, our software components that require the cardano-cli or such, required access to the socket file, limiting us to the same local machine or some sort of filesystem networking (nfs...).
@@ -102,6 +102,7 @@ Coming Soon, this will show examples of how to relay traffic from server to clie
 
 ### Learning About Cardano Hardforks the Hard Way
 -----
+Yes, during our start with Cardano development, we studied what a hardfork event meant. Seemed pretty clear, things would change in the way blocks are written and we'd upgrade to a new version of the services that understood those changes. Crystal clear! Simple! Not really! Nobody tells you this is about to happen.
 We struggled learning that a hard fork was coming. Why? When? Do we have a way of being told about this?
 We're often busy building software, we're not out there searching for when a hardfork will hit. This has bit us on more than one occassion.
 
@@ -113,8 +114,8 @@ The [Cardano Compatibilty Matrix](https://docs.cardano.org/tools/comp-matrix) do
 
 ### Shoutouts - sites we found useful tips and hints on
 Just wanted to thank the people that participated in solving similar problems:
-https://medium.com/neoncat-io/how-to-communicate-with-the-cardano-node-on-a-remote-host-fe05dfd1bb94
-https://github.com/input-output-hk/cardano-wallet/issues/1556
-https://github.com/binlab/docker-socat
-https://lihsmi.ch/docker/2020/01/02/socat-docker.html
+- https://medium.com/neoncat-io/how-to-communicate-with-the-cardano-node-on-a-remote-host-fe05dfd1bb94
+- https://github.com/input-output-hk/cardano-wallet/issues/1556
+- https://github.com/binlab/docker-socat
+- https://lihsmi.ch/docker/2020/01/02/socat-docker.html
 
