@@ -6,7 +6,7 @@ Docker image to support forwarding file based sockets to TCP and TCP to file bas
 ### Why
 ------------
 While running cardano nodes, dbsync, postgres and wallet-server we found it difficult to meet the minimum hardware requirements and remain scalable/stable with all of our custom software components. 
-When a [hardfork](Learning-About-Cardano-Hardforks-the-Hard-Way) comes along we often found ourselves down or struggling last minute to keep up.
+When a [hardfork](#Learning-About-Cardano-Hardforks-the-Hard-Way) comes along we often found ourselves down or struggling last minute to keep up.
 
 We run a kubernetes cluster, separating our logical units of work using namespaces.
 In the past, our software components that require the cardano-cli or such, required access to the socket file, limiting us to the same local machine or some sort of filesystem networking (nfs...).
