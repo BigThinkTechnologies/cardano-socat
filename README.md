@@ -69,10 +69,19 @@ docker run -it --rm --name cardano_socat_client \
 	bigthink/cardano:socat-v1.0.0 --tcp-to-socket-file
 ```
 
-Running a cardano-cli to show the uses
-- TODO:// show running a cardano cli using cardano-node docker image so we can show querying tip
-
-
+Running a cardano-cli locally to show the uses
+- From the same system running the client mode as above, run this to show the cli at work
+- Try stopping cardano_socat_client and running this command, note how it stops working!
+```bash
+docker run -it --rm --name cardano-cli \
+	-v ${LOCAL_DESTINATION_SOCKET_PATH}:/cardano-socat-test-client/data/test/cardano-node/data \
+	-v /data \
+	-e NETWORK=testnet \
+	-e CARDANO_NODE_SOCKET_PATH=/cardano-socat-test-client/data/test/cardano-node/data/node.socket \
+	--entrypoint "/usr/local/bin/cardano-cli" \
+	inputoutput/cardano-node:1.30.1 \
+	query tip --testnet-magic 1097911063
+```
 
 ##### Running in Kubernetes:
 - TODO:// this should have more details, it might be nice to have an actually mini kube showcasing everything but...
@@ -110,9 +119,21 @@ docker run -it --rm --name cardano_socat_client \
 	bigthink/cardano:socat-v1.0.0 --tcp-to-socket-file
 ```
 
-Running a cardano-cli to show the uses locally from your cluster
-- TODO:// show running a cardano cli using cardano-node docker image
+Running a cardano-cli in your k8s cluster
+- From the same system running the client mode as above, run this to show the cli at work
+- Try stopping cardano_socat_client and running this command, note how it stops working!
+```bash
+docker run -it --rm --name cardano-cli \
+	-v ${LOCAL_DESTINATION_SOCKET_PATH}:/cardano-socat-test-client/data/test/cardano-node/data \
+	-v /data \
+	-e NETWORK=testnet \
+	-e CARDANO_NODE_SOCKET_PATH=/cardano-socat-test-client/data/test/cardano-node/data/node.socket \
+	--entrypoint "/usr/local/bin/cardano-cli" \
+	inputoutput/cardano-node:1.30.1 \
+	query tip --testnet-magic 1097911063
+```
 
+That's all for now!
 
 ### Usage examples and Design Patterns
 ------------
