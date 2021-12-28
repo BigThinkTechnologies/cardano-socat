@@ -29,7 +29,7 @@ then
 		# run in server mode
 		socket_path=$(realpath $SOURCE_SOCKET_PATH)
 		echo "listening ${args}"
-		socat TCP-LISTEN:${DESTINATION_TCP_PORT},fork,reuseaddr, UNIX-CONNECT:$socket_path
+		socat -d TCP-LISTEN:${DESTINATION_TCP_PORT},fork,reuseaddr, UNIX-CONNECT:$socket_path
 	else
 		echo "Error, environment variables SOURCE_SOCKET_PATH or DESTINATION_TCP_PORT were not set correctly for socket-file-to-tcp mode"
 		print_help
@@ -45,7 +45,7 @@ then
 		mkdir -p $(dirname $DESTINATION_SOCKET_PATH)
 		socket_path=$(realpath $DESTINATION_SOCKET_PATH)
 		echo "listening ${args}"
-		socat UNIX-LISTEN:$socket_path,fork,reuseaddr,unlink-early, TCP:${SOURCE_IP}:${SOURCE_TCP_PORT}
+		socat -d UNIX-LISTEN:$socket_path,fork,reuseaddr,unlink-early, TCP:${SOURCE_IP}:${SOURCE_TCP_PORT}
 	else
 		echo "Error, environment variables DESTINATION_SOCKET_PATH or SOURCE_TCP_PORT or SOURCE_IP were not set correctly for tcp-to-socket-file mode"
 		print_help

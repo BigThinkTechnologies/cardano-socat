@@ -33,73 +33,86 @@ Please make sure you DO NOT expose these TCP ports over the internet without run
 
 ### Installation and Usage
 ------------
+
+##### Running Locally using Docker and Daedalus
 - Run a local testnet Daedalus
 - Once it's ready note your environment variable $CARDANO_NODE_SOCKET_PATH as it points to the socket we're going to extend
 ```bash 
 echo $CARDANO_NODE_SOCKET_PATH
 ```
 
-TODO:// we shouldn't point mount points at the node.socket file directly, only the directory up by one
-
-
 Running in server mode
 ```bash
-export CSS_SOURCE_SOCKET_PATH=${CARDANO_NODE_SOCKET_PATH}
-export CSS_DESTINATION_TCP_PORT=3317
-sudo docker run -it --rm --name cardano_socat_server \
-	-p 9965:${CSS_DESTINATION_TCP_PORT} \
-	--privileged \
-	-v ${CSS_SOURCE_SOCKET_PATH}:/cardano-socat/node.socket \
-	-e SOURCE_SOCKET_PATH=/cardano-socat/node.socket \
-	-e DESTINATION_TCP_PORT=${CSS_DESTINATION_TCP_PORT} \
+export LOCAL_TCP_PORT=9965
+# -v mount our directory where the node.socket file resides
+docker run -it --rm --name cardano_socat_server \
+	-p ${LOCAL_TCP_PORT}:3317 \
+	-v $(dirname $CARDANO_NODE_SOCKET_PATH):/cardano-socat-test-client/data/test/cardano-node/data \
+	-e SOURCE_SOCKET_PATH=/cardano-socat-test-client/data/test/cardano-node/data/node.socket \
+	-e DESTINATION_TCP_PORT=3317 \
 	bigthink/cardano:socat-v1.0.0 --socket-file-to-tcp
 ```
 
 Running in client mode
 ```bash
-export CSC_SOURCE_TCP_PORT=9965
-export CSC_DESTINATION_SOCKET_PATH=/cardano-socat-test-client/data/test/cardano-node/data/node.socket
-export CSC_DESTINATION_SOCKET_PATH_ROOT=/cardano-socat-test-client/data/test/cardano-node/data
 export LOCAL_DESTINATION_SOCKET_PATH=~/cardano-socat-test-client/data/test/cardano-node/data
 mkdir -p ${LOCAL_DESTINATION_SOCKET_PATH}
 export CSC_SOURCE_IP=$(ipconfig getifaddr en0) # or whatever network adaptor you use
 or
 export CSC_SOURCE_IP=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' cardano_socat_server)
 
-sudo docker run -it --rm --name cardano_socat_client \
-	--privileged \
-	-v ${LOCAL_DESTINATION_SOCKET_PATH}:${CSC_DESTINATION_SOCKET_PATH_ROOT} \
-	-e DESTINATION_SOCKET_PATH=${CSC_DESTINATION_SOCKET_PATH} \
-	-e SOURCE_TCP_PORT=${CSC_SOURCE_TCP_PORT} \
+docker run -it --rm --name cardano_socat_client \
+	-v ${LOCAL_DESTINATION_SOCKET_PATH}:/cardano-socat-test-client/data/test/cardano-node/data \
+	-e DESTINATION_SOCKET_PATH=/cardano-socat-test-client/data/test/cardano-node/data/node.socket \
+	-e SOURCE_TCP_PORT=${LOCAL_TCP_PORT} \
 	-e SOURCE_IP=${CSC_SOURCE_IP} \
 	bigthink/cardano:socat-v1.0.0 --tcp-to-socket-file
 ```
 
-TODO:// this isn't correct yet!
-Running a cardano-node to query tip on the new socket file
-cardano-cli query tip --testnet-magic 1097911063
+Running a cardano-cli to show the uses
+- TODO:// show running a cardano cli using cardano-node docker image so we can show querying tip
 
+
+
+##### Running in Kubernetes:
+- TODO:// this should have more details, it might be nice to have an actually mini kube showcasing everything but...
+- Run the server on a compute unit that's running a cardano node as a relay or producer
+- Ensure you know the path of the socket file and adjust DIRECTORY_TO_CARDANO_NODE_SOCKET_FILE_WITHOUT_SOCKET_FILE_SUFFIX below
+- Note that we do NOT want the socket file in the path of DIRECTORY_TO_CARDANO_NODE_SOCKET_FILE_WITHOUT_SOCKET_FILE_SUFFIX
+- WARNING: Don't test this out on mainnet, use a testnet node first
+
+Running in server mode
 ```bash
-export CSC_DESTINATION_SOCKET_PATH_ROOT=/cardano-socat-test-client/data/test/cardano-node/data
-export LOCAL_DESTINATION_SOCKET_PATH=~/cardano-socat-test-client/data/test/cardano-node/data
-mkdir -p ${LOCAL_DESTINATION_SOCKET_PATH}/config
-wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/config.json https://hydra.iohk.io/build/7654130/download/1/testnet-config.json
-wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/shelley-genesis.json https://hydra.iohk.io/build/7654130/download/1/testnet-shelley-genesis.json
-wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/byron-genesis.json https://hydra.iohk.io/build/7654130/download/1/testnet-byron-genesis.json
-wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/alonzo-genesis.json https://hydra.iohk.io/build/7654130/download/1/testnet-alonzo-genesis.json
-wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/topology.json https://hydra.iohk.io/build/7654130/download/1/testnet-topology.json
-
-
-sudo docker run -it --rm --name cardano_client \
-	--privileged \
-	-v ${LOCAL_DESTINATION_SOCKET_PATH}:${CSC_DESTINATION_SOCKET_PATH_ROOT} \
-	-e CARDANO_NODE_SOCKET_PATH=${LOCAL_DESTINATION_SOCKET_PATH}/node.socket \
-	-e NETWORK="--testnet-magic 1097911063" \
-	inputoutput/cardano-node:1.30.1 \
-	--config ${CSC_DESTINATION_SOCKET_PATH_ROOT}/config.json \
-    --topology ${CSC_DESTINATION_SOCKET_PATH_ROOT}/topology.json \
-	"cardano-cli query tip"
+export LOCAL_TCP_PORT=9965
+# -v mount our directory where the node.socket file resides without the actual socket file name
+docker run -it --rm --name cardano_socat_server \
+	-p ${LOCAL_TCP_PORT}:3317 \
+	-v DIRECTORY_TO_CARDANO_NODE_SOCKET_FILE_WITHOUT_SOCKET_FILE_SUFFIX:/cardano-socat-test-client/data/test/cardano-node/data \
+	-e SOURCE_SOCKET_PATH=/cardano-socat-test-client/data/test/cardano-node/data/node.socket \
+	-e DESTINATION_TCP_PORT=3317 \
+	bigthink/cardano:socat-v1.0.0 --socket-file-to-tcp
 ```
+
+Running in client mode (on a separate compute unit or use different directory to write the socket file)
+```bash
+# this is the directory on your host
+export LOCAL_DESTINATION_SOCKET_PATH=~/cardano-socat-test-client/data/test/cardano-node/data
+mkdir -p ${LOCAL_DESTINATION_SOCKET_PATH}
+# get the ip and port of cardano_socat_server and ensure you have mount points in place
+#	if you're using PV's set that up instead
+# replace IP_GOES_HERE with the of of cardano_socat_server
+
+docker run -it --rm --name cardano_socat_client \
+	-v ${LOCAL_DESTINATION_SOCKET_PATH}:/cardano-socat-test-client/data/test/cardano-node/data \
+	-e DESTINATION_SOCKET_PATH=/cardano-socat-test-client/data/test/cardano-node/data/node.socket \
+	-e SOURCE_TCP_PORT=${LOCAL_TCP_PORT} \
+	-e SOURCE_IP=IP_GOES_HERE \
+	bigthink/cardano:socat-v1.0.0 --tcp-to-socket-file
+```
+
+Running a cardano-cli to show the uses locally from your cluster
+- TODO:// show running a cardano cli using cardano-node docker image
+
 
 ### Usage examples and Design Patterns
 ------------
