@@ -3,8 +3,16 @@ cardano-socat
 
 Docker image to support forwarding file based sockets to TCP and TCP to file based sockets. Tested using the cardano-node, cardano-db-sync, cardano-wallet-server
 
+
 ### Current Status:
+------------
 This is our v1, lite testing, running locally on macOS using docker and in k8s.
+
+
+### Docker Hub:
+------------
+[Here it is in docker hub](https://hub.docker.com/repository/docker/bigthink/cardano)
+
 
 ### Why
 ------------
