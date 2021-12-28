@@ -11,7 +11,7 @@ This is our v1, lite testing, running locally on macOS using docker and in k8s.
 
 ### Docker Hub
 ------------
-[On Docker Hub](https://hub.docker.com/repository/docker/bigthink/cardano)
+See us on [Docker Hub](https://hub.docker.com/repository/docker/bigthink/cardano)
 
 
 ### Why
