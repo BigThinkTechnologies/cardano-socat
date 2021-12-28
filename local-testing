@@ -1,0 +1,50 @@
+local testing:
+
+# on my laptop
+export LOCAL_DESTINATION_SOCKET_PATH=~/cardano-socat-test-client/data/test/cardano-node/data
+mkdir -p ${LOCAL_DESTINATION_SOCKET_PATH}
+
+docker run -it --rm --name cardano-socat-client \
+    -v ~/cardano-socat-test-client/data/test/cardano-node/data:/data/test/cardano-node/data \
+    -e SOURCE_IP=NAH \
+    -e DESTINATION_SOCKET_PATH=/data/test/cardano-node/data/node.socket \
+    -e SOURCE_TCP_PORT=NAH \
+    bigthink/cardano:socat-v1.0.0 --tcp-to-socket-file
+
+
+docker run -it --rm --name cardano-cli-socketed \
+    -v ~/cardano-socat-test-client/data/test/cardano-node/data:/data/test/cardano-node/data \
+	-e CARDANO_NODE_SOCKET_PATH=/data/test/cardano-node/data/node.socket \
+	bigthink/docker-repository:cardano-cli-node-nodejs-1.30.1 /bin/bash
+
+
+run 
+cardano-cli query tip --testnet-magic 1097911063
+or
+cardano-cli query tip --mainnet
+
+in cardano-cli-socketed
+
+
+# automatically run this locally to test
+docker run -it --rm --name cardano-cli \
+	-v ~/cardano-socat-test-client/data/test/cardano-node/data:/data/test/cardano-node/data \
+	-v /data \
+	-e NETWORK=testnet \
+	-e CARDANO_NODE_SOCKET_PATH=/data/test/cardano-node/data/node.socket \
+	--entrypoint "/usr/local/bin/cardano-cli" \
+	inputoutput/cardano-node:1.30.1 \
+	query tip --testnet-magic 1097911063
+
+
+
+
+
+# how to get configs for cardano-node
+
+wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/config.json https://hydra.iohk.io/build/7654130/download/1/testnet-config.json
+wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/shelley-genesis.json https://hydra.iohk.io/build/7654130/download/1/testnet-shelley-genesis.json
+wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/byron-genesis.json https://hydra.iohk.io/build/7654130/download/1/testnet-byron-genesis.json
+wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/alonzo-genesis.json https://hydra.iohk.io/build/7654130/download/1/testnet-alonzo-genesis.json
+wget -O ${LOCAL_DESTINATION_SOCKET_PATH}/config/topology.json https://hydra.iohk.io/build/7654130/download/1/testnet-topology.json
+
