@@ -3,6 +3,9 @@ cardano-socat
 
 Docker image to support forwarding file based sockets to TCP and TCP to file based sockets. Tested using the cardano-node, cardano-db-sync, cardano-wallet-server
 
+### Current Status:
+This isn't completed yet! We'll remove this banner once we're ready!
+
 ### Why
 ------------
 While running cardano nodes, dbsync, postgres and wallet-server we found it difficult to meet the minimum hardware requirements and remain scalable/stable with all of our custom software components. 
@@ -36,6 +39,8 @@ Please make sure you DO NOT expose these TCP ports over the internet without run
 echo $CARDANO_NODE_SOCKET_PATH
 ```
 
+TODO:// we shouldn't point mount points at the node.socket file directly, only the directory up by one
+
 
 Running in server mode
 ```bash
@@ -44,8 +49,8 @@ export CSS_DESTINATION_TCP_PORT=3317
 sudo docker run -it --rm --name cardano_socat_server \
 	-p 9965:${CSS_DESTINATION_TCP_PORT} \
 	--privileged \
-	-v ${CSS_SOURCE_SOCKET_PATH}:/source-socket/node.socket \
-	-e SOURCE_SOCKET_PATH=/source-socket/node.socket \
+	-v ${CSS_SOURCE_SOCKET_PATH}:/cardano-socat/node.socket \
+	-e SOURCE_SOCKET_PATH=/cardano-socat/node.socket \
 	-e DESTINATION_TCP_PORT=${CSS_DESTINATION_TCP_PORT} \
 	bigthink/cardano:socat-v1.0.0 --socket-file-to-tcp
 ```
